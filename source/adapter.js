@@ -394,7 +394,7 @@ AdapterJS.recursivePolyfillBind(obj) {
     if (typeof currentProperty === 'function') {
       currentProperty.bind = Function.prototype.bind;
     } else if(typeof currentProperty === 'object') {
-      recursivePolyfillBind(currentProperty);
+      AdapterJS.recursivePolyfillBind(currentProperty);
     }
   }
 }
