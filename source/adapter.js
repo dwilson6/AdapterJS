@@ -382,6 +382,23 @@ AdapterJS.addEvent = function(elem, evnt, func) {
   }
 };
 
+AdapterJS.recursivePolyfillBind(obj) {
+  if (!obj) {
+    return;
+  }
+
+  var pluginProperties = Object.keys(obj);
+  for (var i = 0; i < pluginProperties.length; i++) {
+    var currentProperty = obj[pluginProperties[i]];
+
+    if (typeof currentProperty === 'function') {
+      currentProperty.bind = Function.prototype.bind;
+    } else if(typeof currentProperty === 'object') {
+      recursivePolyfillBind(currentProperty);
+    }
+  }
+}
+
 AdapterJS.renderNotificationBar = function (message, buttonText, buttonCallback) {
   // only inject once the page is ready
   if (document.readyState !== 'interactive' && document.readyState !== 'complete') {
@@ -1133,7 +1150,11 @@ if (['webkit', 'moz', 'ms', 'AppleWebKit'].indexOf(AdapterJS.webrtcDetectedType)
         if (iceServers) {
           servers.iceServers = iceServers;
         }
-        return AdapterJS.WebRTCPlugin.plugin.PeerConnection(servers);
+        
+        // polyfill plugin functions with bind()
+        var peerConnection = AdapterJS.WebRTCPlugin.plugin.PeerConnection(servers);
+        AdapterJS.recursivePolyfillBind(peerConnection);
+        return peerConnection;
       } else {
         var mandatory = (constraints && constraints.mandatory) ?
           constraints.mandatory : null;
