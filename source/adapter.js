@@ -391,7 +391,7 @@ AdapterJS.recursivePolyfillBind(obj) {
   for (var i = 0; i < pluginProperties.length; i++) {
     var currentProperty = obj[pluginProperties[i]];
 
-    if (typeof currentProperty === 'function') {
+    if (typeof currentProperty === 'function' && !currentProperty.bind) {
       currentProperty.bind = Function.prototype.bind;
     } else if(typeof currentProperty === 'object') {
       AdapterJS.recursivePolyfillBind(currentProperty);
