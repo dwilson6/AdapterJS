@@ -382,7 +382,7 @@ AdapterJS.addEvent = function(elem, evnt, func) {
   }
 };
 
-AdapterJS.recursivePolyfillBind(obj) {
+AdapterJS.recursivePolyfillBind = function(obj) {
   if (!obj) {
     return;
   }
