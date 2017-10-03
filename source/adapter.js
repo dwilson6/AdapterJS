@@ -387,6 +387,12 @@ AdapterJS.recursivePolyfillBind = function(obj) {
     return;
   }
 
+  // these objects cause infinite recursion in IE; ignore them
+  var recursionBlacklist = ['attachEvent()', 'detachEvent()', 'getLastException()'];
+  if (obj.value && recursionBlacklist.indexOf(obj.value.trim()) > -1) {
+    return;
+  }
+
   var pluginProperties = Object.keys(obj);
   for (var i = 0; i < pluginProperties.length; i++) {
     var currentProperty = obj[pluginProperties[i]];
