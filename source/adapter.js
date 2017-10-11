@@ -397,13 +397,43 @@ AdapterJS.recursivePolyfillBind = function(obj) {
   for (var i = 0; i < pluginProperties.length; i++) {
     var currentProperty = obj[pluginProperties[i]];
 
-    if (typeof currentProperty === 'function' && !currentProperty.bind) {
-      currentProperty.bind = Function.prototype.bind;
+    if ((typeof currentProperty === 'function' || (currentProperty && currentProperty.call)) && !currentProperty.bind) {
+      // with the NPAPI/ActiveX JS functions you have to bind the bindPolyfill function to the NPAPI function and
+      // then call the bound function with the obj because the function must be called on its parent object
+      currentProperty.bind = bindPolyfill.bind(currentProperty)(obj);
     } else if (typeof currentProperty === 'object') {
       AdapterJS.recursivePolyfillBind(currentProperty);
     }
   }
 }
+
+// adapted from: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Polyfill
+function bindPolyfill(oThis) {
+  // NPAPI/ActiveX JS functions are objects with a call property
+  if (typeof this !== 'function' && !(this && this.call)) {
+    // closest thing possible to the ECMAScript 5
+    // internal IsCallable function
+    throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
+  }
+
+  var aArgs   = Array.prototype.slice.call(arguments, 1),
+    fToBind = this,
+    fNOP    = function() {},
+    fBound  = function() {
+      return fToBind.apply(this instanceof fNOP
+          ? this
+          : oThis,
+        aArgs.concat(Array.prototype.slice.call(arguments)));
+    };
+
+  if (this.prototype) {
+    // Function.prototype doesn't have a prototype property
+    fNOP.prototype = this.prototype;
+  }
+  fBound.prototype = new fNOP();
+
+  return fBound;
+};
 
 AdapterJS.renderNotificationBar = function (message, buttonText, buttonCallback) {
   // only inject once the page is ready
