@@ -361,7 +361,7 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
     } else { // desktop
       webrtcDetectedType    = hasNativeImpl && !AdapterJS.options.forceSafariPlugin ? 'AppleWebKit' : 'plugin';
     }
-    webrtcDetectedDCSupport = 'SCTP'; 
+    webrtcDetectedDCSupport = 'SCTP';
   }
 
   // Scope it to AdapterJS and window for better consistency
@@ -369,7 +369,7 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
   AdapterJS.webrtcDetectedVersion   = window.webrtcDetectedVersion   = webrtcDetectedVersion;
   AdapterJS.webrtcMinimumVersion    = window.webrtcMinimumVersion    = webrtcMinimumVersion;
   AdapterJS.webrtcDetectedType      = window.webrtcDetectedType      = webrtcDetectedType;
-  AdapterJS.webrtcDetectedDCSupport = window.webrtcDetectedDCSupport = webrtcDetectedDCSupport; 
+  AdapterJS.webrtcDetectedDCSupport = window.webrtcDetectedDCSupport = webrtcDetectedDCSupport;
 };
 
 AdapterJS.addEvent = function(elem, evnt, func) {
@@ -416,10 +416,13 @@ function bindPolyfill(oThis) {
     throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
   }
 
+  console.log('bind time this: ', this.toString(), 'oThis: ', oThis.toString());
+
   var aArgs   = Array.prototype.slice.call(arguments, 1),
     fToBind = this,
     fNOP    = function() {},
     fBound  = function() {
+      console.log('execution time this: ', this.toString(), 'oThis: ', oThis.toString(), this instanceof fNOP);
       return fToBind.apply(this instanceof fNOP
           ? this
           : oThis,
@@ -1186,7 +1189,7 @@ if (['webkit', 'moz', 'ms', 'AppleWebKit'].indexOf(AdapterJS.webrtcDetectedType)
         if (iceServers) {
           servers.iceServers = iceServers;
         }
-        
+
         // polyfill plugin functions with bind()
         var peerConnection = AdapterJS.WebRTCPlugin.plugin.PeerConnection(servers);
         AdapterJS.recursivePolyfillBind(peerConnection);
